@@ -1,8 +1,32 @@
-var keys = require('keys.js');
+var keys = require('./keys');
+var request = require('request');
+var Twitter = require('twitter');
 
+// Setting up Twitter Client ////////////////////////
+var client = new Twitter(keys.twitterKeys);
+
+
+var command = process.argv[2].toLowerCase();
 // node liri.js my-tweets
 // This will show your last 20 tweets and when they were created at in your terminal/bash window.
-function my-tweets(){
+function getTweets(){
+
+	var params = {screen_name: 'holdonbrucelee'};
+	client.get('statuses/user_timeline', params, function(error, tweets, response) {
+
+		if (!error) {
+			// console.log(tweets)
+
+			for (i = 0; i < tweets.length; i ++) {
+
+				console.log(tweets[i].text);
+
+			}
+
+
+		}
+
+	})
 
 };
 
@@ -15,7 +39,7 @@ function my-tweets(){
 
 //if no song is provided then your program will default to "The Sign" by Ace of Base
 
-function spotify-this-song() {
+function spotifyThisSong() {
 
 };
 
@@ -35,7 +59,7 @@ function spotify-this-song() {
 	// * If the user doesn't type a movie in, the program will output data for the movie 'Mr. Nobody.'
 	// 	* If you haven't watched "Mr. Nobody," then you should: http://www.imdb.com/title/tt0485947/
 	// 	* It's on Netflix!
-function movie-this() {
+function movieThis() {
 
 };	
 
@@ -43,6 +67,28 @@ function movie-this() {
 	// * Using the `fs` Node package, LIRI will take the text inside of random.txt and then use it to call one of LIRI's commands.
 	// 	* It should run `spotify-this-song` for "I Want it That Way," as follows the text in `random.txt`.
 	// 	* Feel free to change the text in that document to test out the feature for other commands.
-function do-what-it-says() {
+function doWhatItSays() {
 
 };	
+
+
+if (command == 'my-tweets') {
+		getTweets();
+
+}else if (command == 'spotify-this-song') {
+
+	spotifyThisSong();
+
+}else if (command == 'movie-this') {
+
+	movieThis();
+
+}else if (command == 'do-what-it-says') {
+
+	doWhatItSays();
+
+}else {
+
+	console.log("Sorry, but that's not a command that I understand.")
+
+}

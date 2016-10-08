@@ -43,6 +43,7 @@ function spotifyThisSong() {
 	// if there is an argument following the command, search for the song on Spotify
 	if (process.argv[3]) {
 
+		// allows for dash input if user does no input a string
 		var song = process.argv[3].replace('-', ' ');
 
 		Spotify.search({ type: 'track', query: song }, function(error, data){
@@ -69,7 +70,27 @@ function spotifyThisSong() {
 	// if the user does not enter a song, search for "The Sign" by Ace of Base
 	}else {
 
+		console.log("You didn't enter a song title! Enjoy this song instead.")
 
+		Spotify.lookup({ type: 'track', id: '0hrBpAOgrt8RXigk83LLNE'}, function(error, data){
+
+			if (error) {
+
+				console.log('Error occurred: ' + error);
+				return;
+
+
+			}else {
+
+				// console.log(data);
+				console.log('Song: ' + data.name);
+				console.log('Artist: ' + data.artists[0].name );
+				console.log('Album: ' + data.album.name);
+				console.log('Spotify Link: ' + data.preview_url);
+
+			}
+
+		})
 
 	}
 

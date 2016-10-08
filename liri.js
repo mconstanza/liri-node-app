@@ -6,9 +6,78 @@ var Spotify = require('spotify');
 // Setting up Twitter Client ////////////////////////
 var client = new Twitter(keys.twitterKeys);
 
-
 // Capture the user's command input //////////////////
 var command = process.argv[2].toLowerCase();
+
+// Logic for handling commands //////////////////////////////////////////
+if (command == 'my-tweets') {
+
+	getTweets();
+
+}else if (command == 'spotify-this-song') {
+
+	// if there is an argument following the command, search for the song on Spotify
+	if (process.argv[3]) {
+
+		spotifyThisSong(process.argv[3]);
+
+	// if the user does not enter a song, search for "The Sign" by Ace of Base
+	}else{
+
+		console.log('\n');
+		console.log("You didn't input a song! Here's the data for 'The Sign' by Ace of Base instead.")
+
+		Spotify.lookup({ type: 'track', id: '0hrBpAOgrt8RXigk83LLNE'}, function(error, data){
+
+			if (!error) {
+
+				console.log('\n');
+				console.log("==========================================================");
+				console.log('Song: ' + data.name);
+				console.log('Artist: ' + data.artists[0].name );
+				console.log('Album: ' + data.album.name);
+				console.log('Spotify Link: ' + data.preview_url);
+				console.log("==========================================================");
+				console.log('\n');
+				
+			}else {
+
+				console.log('Error occurred: ' + error);
+				return;
+
+			}
+
+		})
+	}
+
+}else if (command == 'movie-this') {
+
+	if (process.argv[3]) {
+
+		movieThis(process.argv[3]);
+
+	}else {
+
+		console.log('\n');
+		console.log("You didn't input a movie Title! Here's the data for 'Mr. Nobody' instead.");
+
+		movieThis('Mr. Nobody');
+
+	}
+	
+}else if (command == 'do-what-it-says') {
+
+	doWhatItSays();
+
+}else {
+
+	console.log('\n');
+	console.log("Sorry, but that's not a command I understand.")
+
+}
+
+// FUNCTIONS ////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // node liri.js my-tweets
 // This will show your last 20 tweets and when they were created at in your terminal/bash window.
@@ -20,11 +89,24 @@ function getTweets(){
 		if (!error) {
 			// console.log(tweets)
 
-			for (i = 0; i < tweets.length; i ++) {
+				console.log('\n');
+				console.log("==========================================================");
+				console.log('\n');
+				console.log('MY (@HOLDONBRUCELEE) MOST RECENT TWEETS');
+				console.log('\n');
+				console.log("==========================================================");
+				console.log('\n');
 
-				console.log(tweets[i].text);
 
+			for (tweet = 0; tweet < tweets.length; tweet ++) {
+
+				console.log(tweets[tweet].text);
+				console.log('Created at: ' + tweets[tweet].created_at);
+				console.log('\n');
+				
 			}
+			console.log("==========================================================");
+			console.log('\n');
 		}
 	})
 };
@@ -38,62 +120,38 @@ function getTweets(){
 
 //if no song is provided then your program will default to "The Sign" by Ace of Base
 
-function spotifyThisSong() {
+function spotifyThisSong(song) {
 
-	// if there is an argument following the command, search for the song on Spotify
-	if (process.argv[3]) {
+	console.log('\n');
+	console.log('Loading song data...')
 
-		// allows for dash input if user does no input a string
-		var song = process.argv[3].replace('-', ' ');
+	Spotify.search({ type: 'track', query: song }, function(error, data){
 
-		Spotify.search({ type: 'track', query: song }, function(error, data){
+		var result = data.tracks.items[0];
 
-			if (error) {
+		if (!error) {
 
-				console.log('Error occurred: ' + error);
-				return;
+			console.log('\n');
+			console.log("==========================================================");
+			console.log('\n');
+			console.log(result.name);
+			console.log('\n');
+			console.log("==========================================================");
+			console.log('\n');
+			console.log("==========================================================");
+			console.log('Artist: ' + result.artists[0].name );
+			console.log('Album: ' + result.album.name);
+			console.log('Spotify Link: ' + result.preview_url);
+			console.log("==========================================================");
+			console.log('\n');
 
+		}else {
 
-			}else {
-
-				// console.log(data.tracks.items[0]);
-				console.log('Song: ' + data.tracks.items[0].name);
-				console.log('Artist: ' + data.tracks.items[0].artists[0].name );
-				console.log('Album: ' + data.tracks.items[0].album.name);
-				console.log('Spotify Link: ' + data.tracks.items[0].preview_url);
-
-			}
-
-		})
-
-
-	// if the user does not enter a song, search for "The Sign" by Ace of Base
-	}else {
-
-		console.log("You didn't enter a song title! Enjoy this song instead.")
-
-		Spotify.lookup({ type: 'track', id: '0hrBpAOgrt8RXigk83LLNE'}, function(error, data){
-
-			if (error) {
-
-				console.log('Error occurred: ' + error);
-				return;
-
-
-			}else {
-
-				// console.log(data);
-				console.log('Song: ' + data.name);
-				console.log('Artist: ' + data.artists[0].name );
-				console.log('Album: ' + data.album.name);
-				console.log('Spotify Link: ' + data.preview_url);
-
-			}
-
-		})
-
-	}
-
+			console.log('Error occurred: ' + error);
+			return;
+			
+		}
+	});
 };
 
 // node liri.js movie-this '<movie name here>
@@ -112,8 +170,47 @@ function spotifyThisSong() {
 	// * If the user doesn't type a movie in, the program will output data for the movie 'Mr. Nobody.'
 	// 	* If you haven't watched "Mr. Nobody," then you should: http://www.imdb.com/title/tt0485947/
 	// 	* It's on Netflix!
-function movieThis() {
+function movieThis(input) {
 
+	var baseUrl = 'http://www.omdbapi.com/?type=movie&plot=short&tomatoes=true&t=';
+	var movie = input;
+	var url = baseUrl + movie
+
+	console.log('\n')
+	console.log("Loading Movie Data...");
+
+	request(url, function(error, data, response) {
+
+		if(!error) {
+
+			var movie = JSON.parse(data.body);
+			// console.log(movie);
+
+			console.log('\n');
+			console.log("==========================================================");
+			console.log('\n');
+			console.log(movie.Title);
+			console.log('\n');
+			console.log("==========================================================");
+			console.log('\n');
+
+			console.log("==========================================================")
+			console.log('Starring: ' + movie.Actors);
+			console.log('Year: ' + movie.Year);
+			console.log('Summary: ' + movie.Plot);
+			console.log('IMDB Rating: ' + movie.imdbRating);
+			console.log('Rotten Tomatoes Rating: ' + movie.tomatoMeter);
+			console.log('Rotten Tomatoes Link: ' + movie.tomatoURL);
+			console.log('Language: ' + movie.Language);
+			console.log('Country: ' + movie.Country);
+			console.log("==========================================================")
+			console.log('\n')
+
+		}else {
+
+			console.log("Error: " + error)
+		}
+	});
 };	
 
 // node liri.js do-what-it-says`
@@ -123,28 +220,3 @@ function movieThis() {
 function doWhatItSays() {
 
 };	
-
-
-
-
-// Logic for handling commands //////////////////////////////////////////
-if (command == 'my-tweets') {
-		getTweets();
-
-}else if (command == 'spotify-this-song') {
-
-	spotifyThisSong();
-
-}else if (command == 'movie-this') {
-
-	movieThis();
-
-}else if (command == 'do-what-it-says') {
-
-	doWhatItSays();
-
-}else {
-
-	console.log("Sorry, but that's not a command that I understand.")
-
-}

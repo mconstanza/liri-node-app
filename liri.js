@@ -29,24 +29,31 @@ function getTweets(){
 		if (!error) {
 			// console.log(tweets)
 
-				console.log('\n');
-				console.log("==========================================================");
-				console.log('\n');
-				console.log('MY (@HOLDONBRUCELEE) MOST RECENT TWEETS');
-				console.log('\n');
-				console.log("==========================================================");
-				console.log('\n');
+			var output = [
+
+				'\n',
+				"==========================================================",
+				'\n',
+				'MY (@HOLDONBRUCELEE) MOST RECENT TWEETS',
+				'\n',
+				"==========================================================",
+				'\n',
+				]
 
 
 			for (tweet = 0; tweet < 10; tweet ++) {
 
-				console.log(tweets[tweet].text);
-				console.log('Created at: ' + tweets[tweet].created_at);
-				console.log('\n');
+				output.push(tweets[tweet].text);
+				output.push('Created at: ' + tweets[tweet].created_at);
+				output.push('\n');
 				
 			}
-			console.log("==========================================================");
-			console.log('\n');
+			
+			output.push("==========================================================");
+			output.push('\n');
+
+			displayOutput(output);
+			logOutput(output);
 		}
 	})
 };
@@ -179,6 +186,8 @@ function movieThis(input) {
 	// 	* It should run `spotify-this-song` for "I Want it That Way," as follows the text in `random.txt`.
 	// 	* Feel free to change the text in that document to test out the feature for other commands.
 function doWhatItSays() {
+
+	console.log('\n' + 'Reading commands from random.txt...')
 
 	fs.readFile('random.txt', 'utf8', function(error, data) {
 

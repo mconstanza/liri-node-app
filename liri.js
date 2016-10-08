@@ -1,5 +1,6 @@
 var keys = require('./keys');
 var fs = require('fs');
+var date = require('date.js');
 var request = require('request');
 var Twitter = require('twitter');
 var Spotify = require('spotify');
@@ -70,26 +71,31 @@ function spotifyThisSong(song) {
 
 		// checks that the search was able to find a match
 		if (data.tracks.items.length == 0){
-			console.log('\n');
-			console.log("Couldn't find that song!");
-			console.log('\n');
+			var output = ['\n', "Couldn't find that song!", '\n']
+
+			displayOutput(output);
+			logOutput(output);
 
 		// found a result and didn't get an error
 		} else if (!error) {
 
-			console.log('\n');
-			console.log("==========================================================");
-			console.log('\n');
-			console.log(result.name);
-			console.log('\n');
-			console.log("==========================================================");
-			console.log('\n');
-			console.log("==========================================================");
-			console.log('Artist: ' + result.artists[0].name );
-			console.log('Album: ' + result.album.name);
-			console.log('Spotify Link: ' + result.preview_url);
-			console.log("==========================================================");
-			console.log('\n');
+			var output = ['\n',
+			"==========================================================",
+			'\n',
+			result.name,
+			'\n',
+			"==========================================================",
+			'\n',
+			"==========================================================",
+			'Artist: ' + result.artists[0].name ,
+			'Album: ' + result.album.name,
+			'Spotify Link: ' + result.preview_url,
+			"==========================================================",
+			'\n']
+
+			displayOutput(output);
+
+			logOutput(output);
 
 		// Error!
 		}else {
@@ -131,30 +137,35 @@ function movieThis(input) {
 		var movie = JSON.parse(data.body);
 
 		if (movie.Response == 'False'){
-			console.log('\n')
-			console.log("I couldn't find a movie with that title.")
-			console.log('\n')
+
+			var output = ['\n', "I couldn't find a movie with that title.", '\n']
+			displayOutput(output);
+			logOutput(output);
+
 		}else if(!error) {
 
-			console.log('\n');
-			console.log("==========================================================");
-			console.log('\n');
-			console.log(movie.Title);
-			console.log('\n');
-			console.log("==========================================================");
-			console.log('\n');
+			var output =['\n',
+			"==========================================================",
+			'\n',
+			movie.Title,
+			'\n',
+			"==========================================================",
+			'\n',
 
-			console.log("==========================================================")
-			console.log('Starring: ' + movie.Actors);
-			console.log('Year: ' + movie.Year);
-			console.log('Summary: ' + movie.Plot);
-			console.log('IMDB Rating: ' + movie.imdbRating);
-			console.log('Rotten Tomatoes Rating: ' + movie.tomatoMeter);
-			console.log('Rotten Tomatoes Link: ' + movie.tomatoURL);
-			console.log('Language: ' + movie.Language);
-			console.log('Country: ' + movie.Country);
-			console.log("==========================================================")
-			console.log('\n')
+			"==========================================================",
+			'Starring: ' + movie.Actors,
+			'Year: ' + movie.Year,
+			'Summary: ' + movie.Plot,
+			'IMDB Rating: ' + movie.imdbRating,
+			'Rotten Tomatoes Rating: ' + movie.tomatoMeter,
+			'Rotten Tomatoes Link: ' + movie.tomatoURL,
+			'Language: ' + movie.Language,
+			'Country: ' + movie.Country,
+			"==========================================================",
+			'\n']
+
+			displayOutput(output);
+			logOutput(output);
 
 		}else {
 
@@ -257,5 +268,31 @@ function handleCommand(command, passedArgument) {
 		console.log('\n');
 		console.log("Sorry, but that's not a command I understand.")
 
+	}
+};
+
+
+// displays output to console
+
+function displayOutput(output) {
+
+	for (i = 0 ; i < output.length ; i++) {
+
+		console.log(output[i]);
+	}
+
+}
+
+// logs function output to log.txt
+function logOutput(output) {
+
+	var timestamp = date('now');
+	
+	fs.appendFileSync('log.txt', '\n' + 'Created: ' + timestamp);
+
+	for (i = 0 ; i < output.length ; i++) {
+
+		fs.appendFileSync('log.txt', output[i] + '\n');
+	
 	}
 };

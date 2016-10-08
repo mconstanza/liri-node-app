@@ -1,12 +1,15 @@
 var keys = require('./keys');
 var request = require('request');
 var Twitter = require('twitter');
+var Spotify = require('spotify');
 
 // Setting up Twitter Client ////////////////////////
 var client = new Twitter(keys.twitterKeys);
 
 
+// Capture the user's command input //////////////////
 var command = process.argv[2].toLowerCase();
+
 // node liri.js my-tweets
 // This will show your last 20 tweets and when they were created at in your terminal/bash window.
 function getTweets(){
@@ -22,12 +25,8 @@ function getTweets(){
 				console.log(tweets[i].text);
 
 			}
-
-
 		}
-
 	})
-
 };
 
 // node liri.js spotify-this-song '<song name here>'
@@ -40,6 +39,39 @@ function getTweets(){
 //if no song is provided then your program will default to "The Sign" by Ace of Base
 
 function spotifyThisSong() {
+
+	// if there is an argument following the command, search for the song on Spotify
+	if (process.argv[3]) {
+
+		var song = process.argv[3].replace('-', ' ');
+
+		Spotify.search({ type: 'track', query: song }, function(error, data){
+
+			if (error) {
+
+				console.log('Error occurred: ' + error);
+				return;
+
+
+			}else {
+
+				// console.log(data.tracks.items[0]);
+				console.log('Song: ' + data.tracks.items[0].name);
+				console.log('Artist: ' + data.tracks.items[0].artists[0].name );
+				console.log('Album: ' + data.tracks.items[0].album.name);
+				console.log('Spotify Link: ' + data.tracks.items[0].preview_url);
+
+			}
+
+		})
+
+
+	// if the user does not enter a song, search for "The Sign" by Ace of Base
+	}else {
+
+
+
+	}
 
 };
 
@@ -72,6 +104,9 @@ function doWhatItSays() {
 };	
 
 
+
+
+// Logic for handling commands //////////////////////////////////////////
 if (command == 'my-tweets') {
 		getTweets();
 

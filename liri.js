@@ -1,4 +1,5 @@
 var keys = require('./keys');
+var fs = require('fs');
 var request = require('request');
 var Twitter = require('twitter');
 var Spotify = require('spotify');
@@ -10,71 +11,9 @@ var client = new Twitter(keys.twitterKeys);
 var command = process.argv[2].toLowerCase();
 
 // Logic for handling commands //////////////////////////////////////////
-if (command == 'my-tweets') {
 
-	getTweets();
+handleCommand(command);
 
-}else if (command == 'spotify-this-song') {
-
-	// if there is an argument following the command, search for the song on Spotify
-	if (process.argv[3]) {
-
-		spotifyThisSong(process.argv[3]);
-
-	// if the user does not enter a song, search for "The Sign" by Ace of Base
-	}else{
-
-		console.log('\n');
-		console.log("You didn't input a song! Here's the data for 'The Sign' by Ace of Base instead.")
-
-		Spotify.lookup({ type: 'track', id: '0hrBpAOgrt8RXigk83LLNE'}, function(error, data){
-
-			if (!error) {
-
-				console.log('\n');
-				console.log("==========================================================");
-				console.log('Song: ' + data.name);
-				console.log('Artist: ' + data.artists[0].name );
-				console.log('Album: ' + data.album.name);
-				console.log('Spotify Link: ' + data.preview_url);
-				console.log("==========================================================");
-				console.log('\n');
-				
-			}else {
-
-				console.log('Error occurred: ' + error);
-				return;
-
-			}
-
-		})
-	}
-
-}else if (command == 'movie-this') {
-
-	if (process.argv[3]) {
-
-		movieThis(process.argv[3]);
-
-	}else {
-
-		console.log('\n');
-		console.log("You didn't input a movie Title! Here's the data for 'Mr. Nobody' instead.");
-
-		movieThis('Mr. Nobody');
-
-	}
-	
-}else if (command == 'do-what-it-says') {
-
-	doWhatItSays();
-
-}else {
-
-	console.log('\n');
-	console.log("Sorry, but that's not a command I understand.")
-
-}
 
 // FUNCTIONS ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -98,7 +37,7 @@ function getTweets(){
 				console.log('\n');
 
 
-			for (tweet = 0; tweet < tweets.length; tweet ++) {
+			for (tweet = 0; tweet < 10; tweet ++) {
 
 				console.log(tweets[tweet].text);
 				console.log('Created at: ' + tweets[tweet].created_at);
@@ -118,7 +57,7 @@ function getTweets(){
 		//* A preview link of the song from Spotify
 		//* The album that the song is from
 
-//if no song is provided then your program will default to "The Sign" by Ace of Base
+// if no song is provided then your program will default to "The Sign" by Ace of Base
 
 function spotifyThisSong(song) {
 
@@ -129,7 +68,14 @@ function spotifyThisSong(song) {
 
 		var result = data.tracks.items[0];
 
-		if (!error) {
+		// checks that the search was able to find a match
+		if (data.tracks.items.length == 0){
+			console.log('\n');
+			console.log("Couldn't find that song!");
+			console.log('\n');
+
+		// found a result and didn't get an error
+		} else if (!error) {
 
 			console.log('\n');
 			console.log("==========================================================");
@@ -145,6 +91,7 @@ function spotifyThisSong(song) {
 			console.log("==========================================================");
 			console.log('\n');
 
+		// Error!
 		}else {
 
 			console.log('Error occurred: ' + error);
@@ -181,10 +128,13 @@ function movieThis(input) {
 
 	request(url, function(error, data, response) {
 
-		if(!error) {
+		var movie = JSON.parse(data.body);
 
-			var movie = JSON.parse(data.body);
-			// console.log(movie);
+		if (movie.Response == 'False'){
+			console.log('\n')
+			console.log("I couldn't find a movie with that title.")
+			console.log('\n')
+		}else if(!error) {
 
 			console.log('\n');
 			console.log("==========================================================");
@@ -219,4 +169,93 @@ function movieThis(input) {
 	// 	* Feel free to change the text in that document to test out the feature for other commands.
 function doWhatItSays() {
 
-};	
+	fs.readFile('random.txt', 'utf8', function(error, data) {
+
+		var dataArr = data.split(',');
+
+		var command = dataArr[0];
+
+		var passedArgument = dataArr[1];
+
+		handleCommand(command, passedArgument);
+	})
+};
+
+// handles user input
+function handleCommand(command, passedArgument) {
+
+	if (command == 'my-tweets') {
+
+		getTweets();
+
+	}else if (command == 'spotify-this-song') {
+
+		// if an argument is passed in a manner other than the console (such as 'do-what-it-says')
+
+		if (passedArgument) {
+
+			spotifyThisSong(passedArgument);
+
+		// if there is an argument following the command, search for the song on Spotify
+		} else if (process.argv[3]) {
+
+			spotifyThisSong(process.argv[3]);
+
+		// if the user does not enter a song, search for "The Sign" by Ace of Base
+		}else{
+
+			console.log('\n');
+			console.log("You didn't input a song! Here's the data for 'The Sign' by Ace of Base instead.")
+
+			Spotify.lookup({ type: 'track', id: '0hrBpAOgrt8RXigk83LLNE'}, function(error, data){
+
+				if (!error) {
+
+					console.log('\n');
+					console.log("==========================================================");
+					console.log('Song: ' + data.name);
+					console.log('Artist: ' + data.artists[0].name );
+					console.log('Album: ' + data.album.name);
+					console.log('Spotify Link: ' + data.preview_url);
+					console.log("==========================================================");
+					console.log('\n');
+					
+				}else {
+
+					console.log('Error occurred: ' + error);
+					return;
+				}
+			})
+		}
+
+	}else if (command == 'movie-this') {
+		// if an argument is passed in a manner other than the console (such as 'do-what-it-says')
+		if (passedArgument) {
+
+			movieThis(passedArgument);
+
+		// if the user entered an argument for the movie title
+		} else if (process.argv[3]) {
+
+			movieThis(process.argv[3]);
+
+		}else {
+
+			console.log('\n');
+			console.log("You didn't input a movie Title! Here's the data for 'Mr. Nobody' instead.");
+
+			movieThis('Mr. Nobody');
+
+		}
+		
+	}else if (command == 'do-what-it-says') {
+
+		doWhatItSays();
+
+	}else {
+
+		console.log('\n');
+		console.log("Sorry, but that's not a command I understand.")
+
+	}
+};

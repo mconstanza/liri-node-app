@@ -41,7 +41,7 @@ function getTweets(){
 				]
 
 
-			for (tweet = 0; tweet < 10; tweet ++) {
+			for (tweet = 0; tweet < 20; tweet ++) {
 
 				output.push(tweets[tweet].text);
 				output.push('Created at: ' + tweets[tweet].created_at);
